@@ -49,21 +49,21 @@ DECLARE @pass_old varchar (50) = (SELECT passport    FROM Broker_company.dbo.Cus
 BEGIN 
      IF @phone    IN (SELECT phone    FROM Broker_company.dbo.Customers WHERE id <> @c_id)
     AND @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-	    RAISERROR('Пользователь с таким номером паспорта и номером телефона уже зарегистрирован!', 16, 1)
+	    RAISERROR('РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј РЅРѕРјРµСЂРѕРј РїР°СЃРїРѕСЂС‚Р° Рё РЅРѕРјРµСЂРѕРј С‚РµР»РµС„РѕРЅР° СѓР¶Рµ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ!', 16, 1)
 
 ELSE IF @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-        RAISERROR('Пользователь с таким номером паспорта уже зарегистрирован!', 16, 1)
+        RAISERROR('РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј РЅРѕРјРµСЂРѕРј РїР°СЃРїРѕСЂС‚Р° СѓР¶Рµ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ!', 16, 1)
 
 ELSE IF @phone    IN (SELECT phone    FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-        RAISERROR('Пользователь с таким номером телефона уже зарегистрирован!', 16, 1)
+        RAISERROR('РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј РЅРѕРјРµСЂРѕРј С‚РµР»РµС„РѕРЅР° СѓР¶Рµ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ!', 16, 1)
 
 ELSE UPDATE Broker_company.dbo.Customers
 	    SET first_name  = @first_name,
-		    second_name = @second_name,
-            email       = @email,
-			phone		= @phone,
-			passport	= @pass_num
-			WHERE id    = @c_id
+		second_name = @second_name,
+                email       = @email,
+		phone       = @phone,
+		passport    = @pass_num
+	    WHERE id = @c_id
 
 INSERT INTO Broker_company.log.Customers 
        (motion,   customer_id, first_name_old, first_name_new, second_name_old, second_name_new, email_old, email_new, phone_old, phone_new, passport_old, passport_new)                                       
