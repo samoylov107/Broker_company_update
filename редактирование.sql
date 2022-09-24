@@ -83,7 +83,6 @@ BEGIN
 END
 GO
 
-
 EXEC Broker_company.dbo.updating_broker_company
      @c_id = 1,
      @first_name = 'George',
