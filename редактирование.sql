@@ -40,9 +40,12 @@ CREATE OR ALTER PROCEDURE dbo.updating_broker_company
 AS
 DECLARE @fn_old varchar (30), 
         @sn_old varchar (30), 
-	@em_old varchar (50), 
+    	@em_old varchar (50), 
 	@ph_old BIGINT, 
-	@pass_old varchar (50)
+        @pass_old varchar (50),
+        @ph_err varchar (20) = NULL,
+	@pass_err varchar (20) = NULL,
+	@msg_err varchar (255)
 
  SELECT @fn_old = first_name, 
         @sn_old = second_name, 
@@ -52,15 +55,17 @@ DECLARE @fn_old varchar (30),
    FROM Broker_company.dbo.Customers 
   WHERE id = @c_id
 
-     IF @phone    IN (SELECT phone    FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-    AND @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-	RAISERROR('Пользователь с таким номером паспорта и номером телефона уже зарегистрирован!', 16, 1)
+     IF @phone IN (SELECT phone FROM Broker_company.dbo.Customers WHERE id <> @c_id)
+    SET @ph_err = 'номером телефона'
+    
+     IF @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
+    SET @pass_err = 'номером паспорта' 
 
-ELSE IF @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-        RAISERROR('Пользователь с таким номером паспорта уже зарегистрирован!', 16, 1)
+    SET @msg_err = CONCAT('Пользователь с таким ', CONCAT_WS(', ', @ph_err, @pass_err), ' уже зарегистрирован!')
 
-ELSE IF @phone    IN (SELECT phone    FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-        RAISERROR('Пользователь с таким номером телефона уже зарегистрирован!', 16, 1)
+     IF @phone IN (SELECT phone FROM Broker_company.dbo.Customers WHERE id <> @c_id)
+     OR @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
+	RAISERROR(@msg_err, 16, 1)
 
 ELSE IF ISNULL(@first_name,'')  <> ISNULL(@fn_old,'') 
      OR ISNULL(@second_name,'') <> ISNULL(@sn_old,'')
