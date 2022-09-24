@@ -70,11 +70,11 @@ ELSE IF ISNULL(@first_name,'')  <> ISNULL(@fn_old,'')
 
 BEGIN	
   UPDATE Broker_company.dbo.Customers
-     SET first_name  = @first_name,
-         second_name = @second_name,
-         email       = @email,
-         phone       = @phone,
-         passport    = @pass_num
+     SET first_name  = ISNULL(@first_name, first_name),
+         second_name = ISNULL(@second_name, second_name),
+         email       = ISNULL(@email, email),
+         phone       = ISNULL(@phone, phone),
+         passport    = ISNULL(@pass_num, passport)
    WHERE id = @c_id
 
   INSERT INTO Broker_company.log.Customers
