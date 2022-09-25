@@ -38,23 +38,15 @@ CREATE OR ALTER PROCEDURE dbo.updating_broker_company
  @phone BIGINT,
  @pass_num varchar (30))
 AS
-DECLARE @fn_old varchar (30), 
-        @sn_old varchar (30), 
-    	@em_old varchar (50), 
-	@ph_old BIGINT, 
-        @pass_old varchar (50),
-        @ph_err varchar (20) = NULL,
-	@pass_err varchar (20) = NULL,
-	@msg_err varchar (255)
-
- SELECT @fn_old = first_name, 
-        @sn_old = second_name, 
-	@em_old = email, 
-	@ph_old = phone,
-	@pass_old = passport 
-   FROM Broker_company.dbo.Customers 
-  WHERE id = @c_id
-
+DECLARE @ph_err varchar (20) = NULL,
+    	@pass_err varchar (20) = NULL,
+    	@msg_err varchar (255)
+DECLARE @temp_table TABLE (first_name varchar (30),
+                           second_name varchar (30),
+                           email varchar (50),
+                           phone BIGINT,
+                           passport varchar (30))
+		
      IF @phone IN (SELECT phone FROM Broker_company.dbo.Customers WHERE id <> @c_id)
     SET @ph_err = 'номером телефона'
     
@@ -65,27 +57,35 @@ DECLARE @fn_old varchar (30),
 
      IF @phone IN (SELECT phone FROM Broker_company.dbo.Customers WHERE id <> @c_id)
      OR @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-	RAISERROR(@msg_err, 16, 1)
+	    RAISERROR(@msg_err, 16, 1)
 
-ELSE IF ISNULL(@first_name,'')  <> ISNULL(@fn_old,'') 
-     OR ISNULL(@second_name,'') <> ISNULL(@sn_old,'')
-     OR ISNULL(@email,'')       <> ISNULL(@em_old,'')
-     OR ISNULL(@phone,0)        <> ISNULL(@ph_old,0)
-     OR ISNULL(@pass_num,'')    <> ISNULL(@pass_old,'')
+   ELSE 
+        UPDATE Broker_company.dbo.Customers
+           SET first_name  = ISNULL(@first_name, first_name),
+               second_name = ISNULL(@second_name, second_name),
+               email       = ISNULL(@email, email),
+               phone       = ISNULL(@phone, phone),
+               passport    = ISNULL(@pass_num, passport)
+        OUTPUT deleted.first_name,
+	       deleted.second_name,
+	       deleted.email,
+               deleted.phone,
+	       deleted.passport
+          INTO @temp_table  
+         WHERE id = @c_id
 
-BEGIN	
-  UPDATE Broker_company.dbo.Customers
-     SET first_name  = ISNULL(@first_name, first_name),
-         second_name = ISNULL(@second_name, second_name),
-         email       = ISNULL(@email, email),
-         phone       = ISNULL(@phone, phone),
-         passport    = ISNULL(@pass_num, passport)
-   WHERE id = @c_id
+IF
+  (SELECT CONCAT(first_name, second_name, email, phone, passport) 
+     FROM @temp_table) 
+          <>
+  (SELECT CONCAT(first_name, second_name, email, phone, passport) 
+     FROM Broker_company.dbo.Customers
+    WHERE id = @c_id)
 
-  INSERT INTO Broker_company.log.Customers
-         (motion, customer_id, first_name, second_name, email, phone, passport)                                       
-  VALUES ('UPDATE', @c_id, @fn_old, @sn_old, @em_old, @ph_old, @pass_old)
-END
+ INSERT INTO Broker_company.log.Customers
+        (motion, customer_id, first_name, second_name, email, phone, passport)                                       
+ SELECT 'UPDATE', @c_id, first_name, second_name, email, phone, passport
+   FROM @temp_table
 GO
 
 EXEC Broker_company.dbo.updating_broker_company
