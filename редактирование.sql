@@ -38,26 +38,29 @@ CREATE OR ALTER PROCEDURE dbo.updating_broker_company
  @phone BIGINT,
  @pass_num varchar (30))
 AS
-DECLARE @ph_err varchar (20) = NULL,
-    	@pass_err varchar (20) = NULL,
-    	@msg_err varchar (255)
+DECLARE	@msg_err varchar (255)
+DECLARE @errors_table TABLE (error_list varchar (50))
 DECLARE @temp_table TABLE (first_name varchar (30),
                            second_name varchar (30),
                            email varchar (50),
                            phone BIGINT,
                            passport varchar (30))
-		
+						   		
      IF @phone IN (SELECT phone FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-    SET @ph_err = 'номером телефона'
-    
-     IF @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-    SET @pass_err = 'номером паспорта' 
+ INSERT INTO @errors_table  
+ VALUES ('phone')  
 
-    SET @msg_err = CONCAT('Пользователь с таким ', CONCAT_WS(', ', @ph_err, @pass_err), ' уже зарегистрирован!')
+     IF @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
+ INSERT INTO @errors_table  
+ VALUES ('passport')  
+
+ SELECT @msg_err = 
+        CONCAT('Данные в следующих полях уже заняты другими пользователями: ', STRING_AGG(error_list, ', '), '!')
+   FROM @errors_table 
 
      IF @phone IN (SELECT phone FROM Broker_company.dbo.Customers WHERE id <> @c_id)
      OR @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-	    RAISERROR(@msg_err, 16, 1)
+	RAISERROR(@msg_err, 16, 1)
 
    ELSE 
         UPDATE Broker_company.dbo.Customers
