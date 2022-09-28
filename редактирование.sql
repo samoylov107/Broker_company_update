@@ -58,8 +58,7 @@ DECLARE @temp_table TABLE (first_name varchar (30),
         CONCAT('Данные в следующих полях уже заняты другими пользователями: ', STRING_AGG(error_list, ', '), '!')
    FROM @errors_table 
 
-     IF @phone IN (SELECT phone FROM Broker_company.dbo.Customers WHERE id <> @c_id)
-     OR @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
+     IF EXISTS (SELECT error_list FROM @errors_table)
 	RAISERROR(@msg_err, 16, 1)
 
    ELSE 
