@@ -76,25 +76,27 @@ DECLARE @temp_table TABLE (first_name varchar (30),
                email       = ISNULL(@email, email),
                phone       = ISNULL(@phone, phone),
                passport    = ISNULL(@pass_num, passport)
+	       age         = ISNULL(@age, age)
         OUTPUT deleted.first_name,
 	       deleted.second_name,
 	       deleted.email,
                deleted.phone,
-	       deleted.passport
+	       deleted.passport,
+	       deleted.age
           INTO @temp_table  
          WHERE id = @c_id
 
 IF
-  (SELECT CONCAT(first_name, second_name, email, phone, passport) 
+  (SELECT CONCAT(first_name, second_name, email, phone, passport, age) 
      FROM @temp_table) 
           <>
-  (SELECT CONCAT(first_name, second_name, email, phone, passport) 
+  (SELECT CONCAT(first_name, second_name, email, phone, passport, age) 
      FROM Broker_company.dbo.Customers
     WHERE id = @c_id)
 
  INSERT INTO Broker_company.log.Customers
-        (motion, customer_id, first_name, second_name, email, phone, passport)                                       
- SELECT 'UPDATE', @c_id, first_name, second_name, email, phone, passport
+        (motion, customer_id, first_name, second_name, email, phone, passport, age)                                       
+ SELECT 'UPDATE', @c_id, first_name, second_name, email, phone, passport, age
    FROM @temp_table
 GO
 
