@@ -67,24 +67,23 @@ SELECT @msg_err = STRING_AGG(error_list, '
   FROM @errors_table 
 
 IF EXISTS (SELECT error_list FROM @errors_table)
-     RAISERROR(@msg_err, 16, 1)
+     THROW 50000, @msg_err, 1
 
-ELSE 
-  UPDATE Broker_company.dbo.Customers
-     SET first_name  = ISNULL(@first_name, first_name),
-         second_name = ISNULL(@second_name, second_name),
-         email       = ISNULL(@email, email),
-         phone       = ISNULL(@phone, phone),
-         passport    = ISNULL(@pass_num, passport),
-         age         = ISNULL(@age, age)
-  OUTPUT deleted.first_name,	
-         deleted.second_name,
-         deleted.email,
-         deleted.phone,
-	 deleted.passport,
-	 deleted.age
-    INTO @old_values  
-   WHERE id = @c_id
+UPDATE Broker_company.dbo.Customers
+   SET first_name  = ISNULL(@first_name, first_name),
+       second_name = ISNULL(@second_name, second_name),
+       email       = ISNULL(@email, email),
+       phone       = ISNULL(@phone, phone),
+       passport    = ISNULL(@pass_num, passport),
+       age         = ISNULL(@age, age)
+OUTPUT deleted.first_name,	
+       deleted.second_name,
+       deleted.email,
+       deleted.phone,
+       deleted.passport,
+       deleted.age
+  INTO @old_values  
+ WHERE id = @c_id
 
 IF
   (SELECT CONCAT(first_name, second_name, email, phone, passport, age) 
