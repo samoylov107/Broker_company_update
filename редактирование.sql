@@ -50,40 +50,41 @@ DECLARE @temp_table TABLE (first_name varchar (30),
                            passport varchar (30),
 			   age TINYINT)
 						   		
-     IF @phone IN (SELECT phone FROM Broker_company.dbo.Customers WHERE id <> @c_id)
- INSERT INTO @errors_table  
- VALUES ('Пользователь с таким номером телефона уже зарегистрирован!')  
+IF @phone IN (SELECT phone FROM Broker_company.dbo.Customers WHERE id <> @c_id)
+     INSERT INTO @errors_table  
+     VALUES ('Пользователь с таким номером телефона уже зарегистрирован!')  
 
-     IF @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
- INSERT INTO @errors_table  
- VALUES ('Пользователь с таким номером паспорта уже зарегистрирован!')  
+IF @pass_num IN (SELECT passport FROM Broker_company.dbo.Customers WHERE id <> @c_id)
+     INSERT INTO @errors_table  
+     VALUES ('Пользователь с таким номером паспорта уже зарегистрирован!')  
  
-      IF @age < 14
- INSERT INTO @errors_table  
- VALUES ('Минимально допустимый возраст - 14 лет!')  
+IF @age < 14
+     INSERT INTO @errors_table  
+     VALUES ('Минимально допустимый возраст - 14 лет!')  
 
- SELECT @msg_err = STRING_AGG(error_list, '; ')
-   FROM @errors_table 
+SELECT @msg_err = STRING_AGG(error_list, '
+')
+  FROM @errors_table 
 
-     IF EXISTS (SELECT error_list FROM @errors_table)
-	RAISERROR(@msg_err, 16, 1)
+IF EXISTS (SELECT error_list FROM @errors_table)
+     RAISERROR(@msg_err, 16, 1)
 
-   ELSE 
-        UPDATE Broker_company.dbo.Customers
-           SET first_name  = ISNULL(@first_name, first_name),
-               second_name = ISNULL(@second_name, second_name),
-               email       = ISNULL(@email, email),
-               phone       = ISNULL(@phone, phone),
-               passport    = ISNULL(@pass_num, passport)
-	       age         = ISNULL(@age, age)
-        OUTPUT deleted.first_name,
-	       deleted.second_name,
-	       deleted.email,
-               deleted.phone,
-	       deleted.passport,
-	       deleted.age
-          INTO @temp_table  
-         WHERE id = @c_id
+ELSE 
+  UPDATE Broker_company.dbo.Customers
+     SET first_name  = ISNULL(@first_name, first_name),
+         second_name = ISNULL(@second_name, second_name),
+         email       = ISNULL(@email, email),
+         phone       = ISNULL(@phone, phone),
+         passport    = ISNULL(@pass_num, passport),
+         age         = ISNULL(@age, age)
+  OUTPUT deleted.first_name,	
+         deleted.second_name,
+         deleted.email,
+         deleted.phone,
+	 deleted.passport,
+	 deleted.age
+    INTO @temp_table  
+   WHERE id = @c_id
 
 IF
   (SELECT CONCAT(first_name, second_name, email, phone, passport, age) 
