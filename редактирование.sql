@@ -7,14 +7,15 @@ GO
 CREATE SCHEMA log
 GO
 
-IF OBJECT_ID('dbo.Customers', 'U') IS NULL 
-CREATE TABLE Broker_company.dbo.Customers 
-(id INT PRIMARY KEY IDENTITY (1,1), 
- first_name varchar (30) NOT NULL,
- second_name varchar (30) NOT NULL,
- email varchar (50),
- phone BIGINT UNIQUE NOT NULL ,
- passport varchar (30) UNIQUE NOT NULL)
+IF OBJECT_ID('dbo.Customers1', 'U') IS NULL 
+CREATE TABLE Broker_company.dbo.Customers1
+(id INT PRIMARY KEY IDENTITY(1,1), 
+ first_name  varchar(30) CHECK(first_name  <> '') NOT NULL,
+ second_name varchar(30) CHECK(second_name <> '') NOT NULL,
+ email varchar(50),
+ phone BIGINT UNIQUE NOT NULL,
+ passport varchar (30) UNIQUE NOT NULL,
+ age TINYINT CHECK(age BETWEEN 14 AND 140))
 GO
 
 IF OBJECT_ID('log.Customers', 'U') IS NULL 
@@ -27,7 +28,8 @@ CREATE TABLE Broker_company.log.Customers
  second_name varchar (30) NOT NULL,
  email varchar (50),
  phone BIGINT NOT NULL,
- passport varchar (30) NOT NULL)
+ passport varchar (30) NOT NULL,
+ age TINYINT)
  GO
 
 CREATE OR ALTER PROCEDURE dbo.updating_broker_company
