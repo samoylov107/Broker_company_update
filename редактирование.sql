@@ -106,5 +106,5 @@ EXEC Broker_company.dbo.updating_broker_company
      @second_name = 'Michael',
      @email = 'george_michael@gmail.com',
      @phone = 79107771134,
-     @pass_num = 'MP0123456789'
+     @pass_num = 'MP0123456789',
      @age = 53
