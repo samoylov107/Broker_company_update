@@ -43,7 +43,7 @@ CREATE OR ALTER PROCEDURE dbo.updating_broker_company
 AS
 DECLARE	@msg_err varchar(MAX)
 DECLARE @errors_table TABLE (error_list varchar (255))
-DECLARE @temp_table TABLE (first_name varchar (30),
+DECLARE @old_values TABLE (first_name varchar (30),
                            second_name varchar (30),
                            email varchar (50),
                            phone BIGINT,
@@ -83,12 +83,12 @@ ELSE
          deleted.phone,
 	 deleted.passport,
 	 deleted.age
-    INTO @temp_table  
+    INTO @old_values  
    WHERE id = @c_id
 
 IF
   (SELECT CONCAT(first_name, second_name, email, phone, passport, age) 
-     FROM @temp_table) 
+     FROM @old_values) 
           <>
   (SELECT CONCAT(first_name, second_name, email, phone, passport, age) 
      FROM Broker_company.dbo.Customers
@@ -97,7 +97,7 @@ IF
  INSERT INTO Broker_company.log.Customers
         (motion, customer_id, first_name, second_name, email, phone, passport, age)                                       
  SELECT 'UPDATE', @c_id, first_name, second_name, email, phone, passport, age
-   FROM @temp_table
+   FROM @old_values
 GO
 
 EXEC Broker_company.dbo.updating_broker_company
