@@ -62,8 +62,7 @@ DECLARE @temp_table TABLE (first_name varchar (30),
  INSERT INTO @errors_table  
  VALUES ('Минимально допустимый возраст - 14 лет!')  
 
- SELECT @msg_err = 
-        CONCAT('Данные в следующих полях уже заняты другими пользователями: ', STRING_AGG(error_list, '; '), '!')
+ SELECT @msg_err = STRING_AGG(error_list, '; ')
    FROM @errors_table 
 
      IF EXISTS (SELECT error_list FROM @errors_table)
